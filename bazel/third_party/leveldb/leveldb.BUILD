@@ -22,15 +22,34 @@ genrule(
 
 cc_library(
     name = "leveldb",
-    srcs = glob(
-        ["**/*.cc"],
+    srcs = select({
+      "@bazel_tools//src/conditions:windows": [
+          "util/env_windows.cc"
+      ],
+      "//conditions:default": [
+          "util/env_posix.cc"
+      ]
+    }) + glob(
+        [
+            "db/**/*.cc",
+            "helpers/**/*.cc",
+            "table/**/*.cc",
+            "util/**/*.cc"
+        ],
         exclude = [
             "doc/**",
             "**/*_test.cc",
             "db/leveldbutil.cc",
             "db/db_bench.cc",
+            "**/*_windows.cc",
+            "**/*_posix.cc",
+
         ],
     ),
+    defines=select({
+      "@bazel_tools//src/conditions:windows_msvc": ["LEVELDB_PLATFORM_WINDOWS"],
+      "//conditions:default": ["LEVELDB_PLATFORM_POSIX"]
+    }),
     hdrs = glob(
         ["**/*.h"],
         exclude = ["doc/**"],

@@ -1,2 +1,0 @@
-build -c opt
-build --force_pic
